@@ -3,7 +3,7 @@
 [![Build Status](https://travis-ci.com/amazing-jay/simple_ruby_service.svg?branch=master)](https://travis-ci.com/amazing-jay/simple_ruby_service)
 [![Test Coverage](https://codecov.io/gh/amazing-jay/simple_ruby_service/graph/badge.svg)](https://codecov.io/gh/amazing-jay/simple_ruby_service)
 
-Simple Ruby Service is a lightweight framework for Ruby that makes it easy to create Services and Service Objects (SOs).
+Simple Ruby Service is a lightweight framework for creating Services and Service Objects (SOs) in Ruby.
 
 The framework provides a simple DSL that:
 
@@ -86,8 +86,8 @@ end
 
 ### Taking a peek under the hood
 
-Similar to ActiveRecord::Base#save!, `DoSomething.call!(params)`:
-- creates a Service Object instance
+Similar to `ActiveRecord::Base#save!`, `DoSomething.call!(params)`:
+- creates an instance of `DoSomething`
 - initializes `instance.attributes` with `params`
 - raises `SimpleRubyService::Invalid` if `instance.invalid?`
 - sends `instance.call`
@@ -110,7 +110,7 @@ class DoSomething
     authorize! resource
   end
   
-  # The return value of `perform` is automatically stored as the SO's `value`
+  # The result of `perform` is automatically stored as the SO's `value`
   def perform
     resource.do_something    
     result = resource.do_something_related  
@@ -152,7 +152,7 @@ class SomeService
 end
 ```
 
-## Special note about Simple Ruby Service Objects and Ducktyping
+## A special note about Simple Ruby Service Objects, Procs, and Ducktyping
 
 Simple Ruby Service Objects respond to (`#call`) so they can stand in for Procs, i.e.:
 ```ruby
@@ -447,6 +447,7 @@ The gem is available as open source under the terms of the [MIT License](https:/
 
 ## DEVELOPMENT ROADMAP
 
-1. Create a helper to dynamically generate default SOs for ActiveRecord models (`create`, `update`, and `destroy`) _(when used in a project that includes [ActiveRecord](https://github.com/rails/rails/tree/main/activerecord))_.
-2. Consider isolating validation errors from execution errors (so that invalid? is not always true when failed? is true)
+1. Create a class level DSL to stop before each Service method unless errors.empty?
+2. Create a helper to dynamically generate default SOs for ActiveRecord models (`create`, `update`, and `destroy`) _(when used in a project that includes [ActiveRecord](https://github.com/rails/rails/tree/main/activerecord))_.
+3. Consider isolating validation errors from execution errors (so that invalid? is not always true when failed? is true)
 
