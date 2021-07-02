@@ -5,11 +5,29 @@
 
 Simple Ruby Service is a lightweight framework for creating Services and Service Objects (SOs) in Ruby.
 
-The framework provides a simple DSL that:
+The framework makes Services and SOs look and feel like ActiveModels, complete with:
 
-1. Incorporates ActiveModel validations and error handling
-2. Encourages a succinct, idiomatic coding style 
-3. Allows Service Objects to ducktype as Procs
+1. Validations and robust error handling
+2. Workflows and method chaining
+3. Consistent interfaces
+
+Additionally, Simple Ruby Service Objects can stand in for Procs, wherever Procs are expected (via ducktyping).
+
+#### What problem does Simple Ruby Service solve?
+
+Currently, most ruby developers roll their own services from scratch. As a result, most services are hastely built (in isolation), and this leads to inconsistant interfaces that are difficult to read. Also, error handling tends to vary wildly within an application, and support code tends to be implemented over and over again.
+
+Simple Ruby Service addresses these problems and encourages succinct, idiomatic coding styles.
+
+#### Should I be using Services & SOs in Ruby / Rails?
+
+[LMGTFY](https://www.google.com/search?q=service+object+pattern+rails&rlz=1C5CHFA_enUS893US893&oq=service+object+pattern+rails) to learn more about Services & SOs.
+
+**TLDR** - Fat models and fat controllers are bad! Services and Service Objects help you DRY things up.
+
+#### How is a Service different from an SO?
+
+An SO is just a Service that encapsulates a single operation (i.e. **one, and only one, responsibility**).
 
 ## Requirements
 
@@ -59,18 +77,18 @@ class SomeController < ApplicationController
 end
 ```
 
-#### ::After:: Refactored using an SO
+#### ::After:: Refactored using an Simple Ruby Service Object
 ```ruby
 # in app/controllers/some_controller.rb
 class SomeController < ApplicationController
   def show
-    # NOTE: Just one, readable line of code
+    # NOTE: That's right... just one, readable line of code
     render DoSomething.call!(params)
   end
 end
 ```
  
-#### ::Alternate After:: Refactored using a Service
+#### ::Alternate After:: Refactored using a Simple Ruby Service
 ```ruby
 # in app/controllers/some_controller.rb
 class SomeController < ApplicationController
@@ -86,14 +104,21 @@ end
 
 ### Taking a peek under the hood
 
-Similar to `ActiveRecord::Base#save!`, `DoSomething.call!(params)`:
-- creates an instance of `DoSomething`
-- initializes `instance.attributes` with `params`
-- raises `SimpleRubyService::Invalid` if `instance.invalid?`
-- sends `instance.call`
-- raises `SimpleRubyService::Failed` if `instance.failed?`
-- returns `instance.value` directly to the caller
+`DoSomething.call!(params)` is deliberately designed to look and feel like `ActiveRecord::Base#save!`.
 
+The following (simplified) implementation illustrates what happens under the hood:
+
+```ruby
+module SimpleRubyService::Object
+  def self.call!(params)
+    instance = new(params)
+    raise Invalid unless instance.valid?
+    self.value = instance.call
+    raise Invalid unless instance.failed?
+    value
+  end
+end
+```
 
 ### Anatomy of a Simple Ruby Service Object
 ```ruby
@@ -101,6 +126,7 @@ Similar to `ActiveRecord::Base#save!`, `DoSomething.call!(params)`:
 class DoSomething
   include SimpleRubyService::ServiceObject
   
+  # `attribute` behaves similar to ActiveRecord::Base#attribute, but is not typed, or bound to persistant storage
   attribute :id
   attr_accessor :resource
 
@@ -350,59 +376,20 @@ class SomeService
 end
 ```
 
-## FAQ
+### Workflows
+Simple Ruby Services are inherently a good fit for workflows because they support chaining, i.e.:
 
-### Why should I use Services & SOs?
-
-[LMGTFY](https://www.google.com/search?q=service+object+pattern+rails&rlz=1C5CHFA_enUS893US893&oq=service+object+pattern+rails) to learn more about the Services & SO design pattern.
-
-**TLDR** - Fat models and fat controllers are bad! Services and Service Objects help you DRY things up.
-
-### How is a Service different from an SO?
-
-An SO is just a Service that encapsulates a single operation (i.e. **one, and only one, responsibility**).
-
-### When should I choose a Service over an SO, and vice-versa?
-
-Use a `Service` when encapsulating related operations that share dependencies & validations.
-
-i.e.:
-
-* Create a Service with two service methods when operation `A` and operation `B` both act on a `User` (and are related in some way).
-* Create two Service Objects when operation `A` and operation `B` are related, but `A` acts on a `User` while `B` acts on a `Company`.
-
-_note: Things get fuzzy when operations share some, but not all, dependencies & validations. Use your best judgement when operation `A` and operation `B` are related but `A` acts on a `User` while `B` acts on both a `User` & a `Company`._
-
-### Atomicity
-The framework does not include transaction support by default. You are responsible for wrapping with a transaction if atomicity is desired.
-
-### Control Flow
-Rescue exceptions that represent internal control flow and propogate the rest.
-
-For example, if an internal call to User.create! is expected to always succeed, allow `ActiveRecord::RecordInvalid` to propogate to the caller. If, on the otherhand, an internal call to User.create! is anticipated to conditionally fail on a uniqueness constraint, rescue `ActiveRecord::RecordInvalid` and rely on the framework to raise `SimpleRubyService::Failure`.
-
-Example::
 ```ruby
-class DoSomethingDangerous < SimpleRubyService::ObjectBase
-  attribute :attr1, :attr2             # should include all params required to execute
-  validates_presence_of :attr1         # validate params to call
-
-  def perform
-    ActiveRecord::Base.transaction do  # optional
-      self.value = # ... do work ...   # save results for the caller
-    end
-  rescue SomeDependency::Failed
-    errors[:base] << e.message         # notify the caller of error
-  rescue ActiveRecord::RecordInvalid
-    # ... fix things and retry ...
-  end
-end
+SomeService.new(params)
+  .do_something
+  .do_something_related
+  .value
 ```
 
-## Workflows
-SOs often need to call other SOs in order to implement various workflows:
+But SOs can also implement various workflows with dependency injection:
+
 ```ruby
-class PerformSomeWorkflow < SimpleRubyService::ObjectBase
+class PerformSomeWorkflow < SimpleRubyService::ServiceObject
   def perform
     dependency = SimpleRubyService1.call!
     result = SimpleRubyService2.call(dependency)
@@ -413,9 +400,6 @@ end
 ```
 
 ## MISC
-
-### Attributes
-The `attribute` and `attributes` keywords behaves similar to [ActiveRecord::Base.attribute](https://api.rubyonrails.org/v6.1.3.1/classes/ActiveRecord/Attributes/ClassMethods.html), but they are not typed or bound to persistant storage.
 
 ### To bang!, or not to bang
 
@@ -430,6 +414,40 @@ Whereas, similar in pattern to `ActiveRecord#save`, the regular version of each 
 * doesn't raise any exceptions
 * passes the return value of the block provided to `#success?` 
 * returns self << _note: this is unlike `ActiveRecord#save`_
+
+### Service or SO?
+
+Use a `Service` when encapsulating related operations that share dependencies & validations.
+
+i.e.:
+
+* Create a Service with two service methods when operation `A` and operation `B` both act on a `User` (and are related in some way).
+* Create two Service Objects when operation `A` and operation `B` are related, but `A` acts on a `User` while `B` acts on a `Company`.
+
+_note: Things get fuzzy when operations share some, but not all, dependencies & validations. Use your best judgement when operation `A` and operation `B` are related but `A` acts on a `User` while `B` acts on both a `User` & a `Company`._
+
+### Control Flow
+Rescue exceptions that represent internal control flow and propogate the rest.
+
+For example, if an internal call to User.create! is expected to always succeed, allow `ActiveRecord::RecordInvalid` to propogate to the caller. If, on the otherhand, an internal call to User.create! is anticipated to conditionally fail on a uniqueness constraint, rescue `ActiveRecord::RecordInvalid` and rely on the framework to raise `SimpleRubyService::Failure`.
+
+Example::
+```ruby
+class DoSomethingDangerous < SimpleRubyService::ServiceObject
+  attribute :attr1, :attr2             # should include all params required to execute
+  validates_presence_of :attr1         # validate params to call
+
+  def perform
+    ActiveRecord::Base.transaction do  # optional
+      self.value = # ... do work ...   # save results for the caller
+    end
+  rescue SomeDependency::Failed
+    errors[:base] << e.message         # notify the caller of error
+  rescue ActiveRecord::RecordInvalid
+    # ... fix things and retry ...
+  end
+end
+```
 
 ## Development
 
