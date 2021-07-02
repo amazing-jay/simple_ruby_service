@@ -4,8 +4,8 @@ rvm:
   - jruby
 # SEE: https://docs.travis-ci.com/user/languages/ruby/
 # install: bundle install --jobs=3 --retry=3
-# before_install:
-  # - gem update bundler
+before_install:
+  - gem update bundler
 env:
   - 'TEST_RAILS_VERSION="~> 5.1.6"'
   - 'TEST_RAILS_VERSION="~> 5.2.3"'
