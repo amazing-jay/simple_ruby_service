@@ -285,7 +285,7 @@ end
 ## Creating Simple Ruby Services
 
 ### Service Objects
-To implement an Simple Ruby Service Object:
+To implement a Simple Ruby Service Object:
 
   1. include `SimpleRubyService::ServiceObject`
   2. declare attributes with the `attribute` keyword (class level DSL)
@@ -313,7 +313,7 @@ end
 ```
 
 ### Services
-To implement an Simple Ruby Service:
+To implement a Simple Ruby Service:
 
   1. include `SimpleRubyService::Service`
   2. declare attributes with the `attribute` keyword (class level DSL)
