@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.2 (01-Jul-21)
+
+* Integrated Travis CI and Codecov
+
 ## 1.0.1 (01-Jul-21)
 
 * Renamed SimpleRubyservice to SimpleRubyService
