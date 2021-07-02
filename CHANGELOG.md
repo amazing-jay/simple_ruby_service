@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.4 (02-Jul-21)
+
+* Polished README (again)
+
 ## 1.0.3 (01-Jul-21)
 
 * Polished README
