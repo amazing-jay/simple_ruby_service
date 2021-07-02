@@ -39,7 +39,6 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'activemodel'
   spec.add_dependency 'activesupport'
 
-  # spec.add_development_dependency 'actionpack'
   spec.add_development_dependency "awesome_print", "~> 1.9.2"
   spec.add_development_dependency "bundler", "~> 1.17"
   spec.add_development_dependency "database_cleaner", "~> 2.0.1"
@@ -49,13 +48,13 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "listen", "~> 3.5.1"
   spec.add_development_dependency "pry-byebug", "~> 3.9"
 
-  # if ENV['TEST_RAILS_VERSION'].nil?
+  # must come before those below
+  if ENV['TEST_RAILS_VERSION'].nil?
     spec.add_development_dependency 'rails', '~> 6.1.3.2'
-  # else
-  #   spec.add_development_dependency 'rails', ENV['TEST_RAILS_VERSION'].to_s
-  # end
+  else
+    spec.add_development_dependency 'rails', ENV['TEST_RAILS_VERSION'].to_s
+  end
 
-  # spec.add_development_dependency "rails", "~> 6.1.3.2"
   spec.add_development_dependency "rake", "~> 10.0"
   spec.add_development_dependency "rspec", "~> 3.0"
   spec.add_development_dependency "rspec-rails", "~> 5.0.1"
@@ -66,5 +65,4 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "simplecov", "~> 0.16"
   spec.add_development_dependency "sqlite3", "~> 1.4.2"
   spec.add_development_dependency "webmock", "~> 3.13"
-
 end
