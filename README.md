@@ -7,9 +7,9 @@ Simple Ruby Service is a lightweight framework for Ruby that makes it easy to cr
 
 The framework provides a simple DSL that:
 
-1. Adds ActiveModel validations and error handling 
+1. Incorporates ActiveModel validations and error handling
 2. Encourages a succinct, idiomatic coding style 
-3. Allows Service Objects to ducktype as Procs
+3. Ducktypes Service Objects as Procs
 
 ## Requirements
 
@@ -37,12 +37,13 @@ Source code can be downloaded on GitHub
   [github.com/amazing-jay/simple_ruby_service/tree/master](https://github.com/amazing-jay/simple_ruby_service/tree/master)
 
 
-### The following examples illustrate how Simple Ruby Service can help you refactor complex business logic
+### The following examples illustrate how to refactor complex business logic with Simple Ruby Service
 
 See [Usage](https://github.com/amazing-jay/simple_ruby_service#usage) & [Creating Simple Ruby Services](https://github.com/amazing-jay/simple_ruby_service#creating-simple-ruby-services) for more information.
 
 #### ::Before:: Vanilla Rails with a fat controller (a contrived example)
 ```ruby
+# in app/controllers/some_controller.rb
 class SomeController < ApplicationController
   def show
     raise unless params[:id].present?
@@ -57,6 +58,7 @@ end
 
 #### ::After:: Refactored using an SO
 ```ruby
+# in app/controllers/some_controller.rb
 class SomeController < ApplicationController
   def show
     # NOTE: Simple Ruby Service Objects ducktype as Procs and do not need to be instantiated
@@ -64,6 +66,8 @@ class SomeController < ApplicationController
   end
 end
 
+
+# in app/service_objects/do_something.rb
 class DoSomething
   include SimpleRubyService::ServiceObject
   
@@ -86,6 +90,7 @@ end
 
 #### ::Alternate Form:: Refactored using a Service
 ```ruby
+# in app/controllers/some_controller.rb
 class SomeController < ApplicationController
   def show
     # NOTE: Simple Ruby Service methods can be chained together
@@ -96,6 +101,7 @@ class SomeController < ApplicationController
   end
 end
 
+# in app/services/do_something.rb
 class SomeService
   include SimpleRubyService::Service
   

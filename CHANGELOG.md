@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.3 (01-Jul-21)
+
+* Finished Travis CI and Codecov integration
+
 ## 1.0.2 (01-Jul-21)
 
 * Integrated Travis CI and Codecov

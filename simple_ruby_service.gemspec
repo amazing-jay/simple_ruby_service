@@ -11,7 +11,7 @@ Gem::Specification.new do |spec|
   spec.email         = ["i.jaycrouch@gmail.com"]
 
   spec.summary       = 'Simple Ruby Service is a lightweight framework for Ruby that makes it easy to create Services and Service Objects (SOs).'
-  spec.description   = 'Simple Ruby Service is a lightweight framework for Ruby that makes it easy to create Services and Service Objects (SOs). The framework provides a simple DSL that: adds ActiveModel validations and error handling; encourages a succinct, idiomatic coding style; and allows Service Objects to ducktype as Procs.'
+  spec.description   = 'Simple Ruby Service is a lightweight framework for Ruby that makes it easy to create Services and Service Objects (SOs). The framework provides a simple DSL that: incorporates ActiveModel validations and error handling; encourages a succinct, idiomatic coding style; Ducktypes Service Objects as Procs.'
   spec.homepage      = 'https://github.com/amazing-jay/simple_ruby_service'
   spec.license       = "MIT"
 
