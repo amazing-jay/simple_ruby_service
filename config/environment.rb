@@ -16,6 +16,9 @@ end
 
 environments = [ENV['RAILS_ENV'].to_sym]
 environments << :development if environments.first == :test
+
+puts environments.to_s
+
 Bundler.require(*environments)
 
 require 'simple_ruby_service'
