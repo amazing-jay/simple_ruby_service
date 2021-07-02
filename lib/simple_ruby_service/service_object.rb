@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # See /README.md
-module SimpleRubyservice
+module SimpleRubyService
   module ServiceObject
     extend ActiveSupport::Concern
     include Service

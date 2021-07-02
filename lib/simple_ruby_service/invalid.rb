@@ -1,5 +1,5 @@
 # frozen_string_literal: true
 
-module SimpleRubyservice
+module SimpleRubyService
   class Invalid < Error; end
 end

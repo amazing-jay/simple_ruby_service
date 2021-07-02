@@ -4,7 +4,7 @@
 require 'active_model'
 
 # namespace
-module SimpleRubyservice; end
+module SimpleRubyService; end
 
 require 'simple_ruby_service/version'
 require 'simple_ruby_service/error'

@@ -2,12 +2,12 @@
 
 require 'action_controller'
 
-RSpec.describe SimpleRubyservice::Service do
+RSpec.describe SimpleRubyService::Service do
   let(:attrs) { { foo: :bar } }
   let(:test_instance) { test_class.new(**attrs) }
   let(:test_class) do
     Class.new do
-      include SimpleRubyservice::Service
+      include SimpleRubyService::Service
       attr_accessor :performed
 
       attribute :foo
@@ -147,13 +147,13 @@ RSpec.describe SimpleRubyservice::Service do
           let(:attrs) { {} }
 
           it 'should raise an error' do
-            expect { subject }.to raise_error(SimpleRubyservice::Invalid)
+            expect { subject }.to raise_error(SimpleRubyService::Invalid)
           end
 
           context 'when rescued' do
             subject do
               test_instance.call! trigger_failure
-            rescue SimpleRubyservice::Invalid
+            rescue SimpleRubyService::Invalid
               test_instance
             end
 
@@ -204,13 +204,13 @@ RSpec.describe SimpleRubyservice::Service do
             let(:trigger_failure) { true }
 
             it 'should raise an error' do
-              expect { subject }.to raise_error(SimpleRubyservice::Failure)
+              expect { subject }.to raise_error(SimpleRubyService::Failure)
             end
 
             context 'when rescued' do
               subject do
                 test_instance.call! trigger_failure
-              rescue SimpleRubyservice::Failure
+              rescue SimpleRubyService::Failure
                 test_instance
               end
 
@@ -242,7 +242,7 @@ RSpec.describe SimpleRubyservice::Service do
       let(:test_instance) { test_class.new }
       let(:test_class) do
         Class.new do
-          include SimpleRubyservice::Service
+          include SimpleRubyService::Service
 
           SANDWICH ||= 'peanut butter'
 

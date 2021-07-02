@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module SimpleRubyservice
+module SimpleRubyService
   # simple exception class with target and message
   class Error < StandardError
     attr_accessor :target

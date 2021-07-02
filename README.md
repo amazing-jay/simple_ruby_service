@@ -1,18 +1,18 @@
-# Simple Ruby service
+# Simple Ruby Service
 
-Simple Ruby service is a lightweight framework for Ruby that makes it easy to create Services and Service Objects (SOs).
+Simple Ruby Service is a lightweight framework for Ruby that makes it easy to create Services and Service Objects (SOs).
 
 The framework provides a simple DSL that:
 
 1. Adds ActiveModel validations and error handling 
 2. Encourages a succinct, idiomatic coding style 
-3. Standardizes the SO interface 
+3. Allows Service Objects to ducktype as Procs
 
 ## Requirements
 
 * Ruby 1.9.2+
 
-_Simple Ruby service includes helpers for Rails 3.0+, but does not require Rails._
+_Simple Ruby Service includes helpers for Rails 3.0+, but does not require Rails._
 
 ## Download and installation
 
@@ -34,9 +34,9 @@ Source code can be downloaded on GitHub
   [github.com/amazing-jay/simple_ruby_service/tree/master](https://github.com/amazing-jay/simple_ruby_service/tree/master)
 
 
-### The following examples illustrate how Simple Ruby service can help you refactor complex business logic
+### The following examples illustrate how Simple Ruby Service can help you refactor complex business logic
 
-See [Usage](https://github.com/amazing-jay/simple_ruby_service#usage) & [Creating Simple Ruby services](https://github.com/amazing-jay/simple_ruby_service#creating-simple-ruby-services) for more information.
+See [Usage](https://github.com/amazing-jay/simple_ruby_service#usage) & [Creating Simple Ruby Services](https://github.com/amazing-jay/simple_ruby_service#creating-simple-ruby-services) for more information.
 
 #### ::Before:: Vanilla Rails with a fat controller (a contrived example)
 ```ruby
@@ -56,13 +56,13 @@ end
 ```ruby
 class SomeController < ApplicationController
   def show
-    # NOTE: Simple Ruby service Objects ducktype as Procs and do not need to be instantiated
+    # NOTE: Simple Ruby Service Objects ducktype as Procs and do not need to be instantiated
     render DoSomething.call(params).value
   end
 end
 
 class DoSomething
-  extend SimpleRubyservice::ServiceObject
+  include SimpleRubyService::ServiceObject
   
   attribute :id
   attr_accessor :resource
@@ -85,7 +85,7 @@ end
 ```ruby
 class SomeController < ApplicationController
   def show
-    # NOTE: Simple Ruby service methods can be chained together
+    # NOTE: Simple Ruby Service methods can be chained together
     render SomeService.new(params)
       .do_something
       .do_something_related
@@ -94,7 +94,7 @@ class SomeController < ApplicationController
 end
 
 class SomeService
-  extend SimpleRubyservice::Service
+  include SimpleRubyService::Service
   
   attribute :id
   attr_accessor :resource
@@ -110,7 +110,7 @@ class SomeService
       resource.do_something_related
     end
 
-    # NOTE: Unlike SOs, `value` must be explicitely set
+    # NOTE: Unlike SOs, `value` must be explicitely set for Service methods
     def do_something_related
       self.value ||= resource.tap &:do_something_related
     end
@@ -128,6 +128,8 @@ Service Object names should begin with a verb and should not include the words `
 
 Also, only one operation should be made public, it should always be named `call`, and it should not accept arguments (except for an optional block).
 
+_See [To bang!, or not to bang](https://github.com/amazing-jay/simple_ruby_service/tree/master#to-bang-or-not-to-bang) to learn about `.call!` vs. `.call`._
+
 #### Short form (_recommended_)
 
 ```ruby
@@ -143,16 +145,14 @@ result = DoSomething.new(foo: 'bar').call!
 ```ruby
 result = begin
   DoSomething.call!(foo: 'bar')
-rescue SimpleRubyservice::Invalid => e
+rescue SimpleRubyService::Invalid => e
   # do something with e.target.attributes
-rescue SimpleRubyservice::Failure
+rescue SimpleRubyService::Failure
   # do something with e.target.value
 end
 ```
 
 #### Conditional form 
-
-_See [To bang!, or not to bang](https://github.com/amazing-jay/simple_ruby_service/tree/master#to-bang-or-not-to-bang) to learn about `.call!` vs. `.call`._
 
 ```ruby
 result = DoSomething.call(foo: 'bar')
@@ -188,6 +188,9 @@ Unlike Service Objects, Service class names should begin with a noun (and may in
 
 Also, any number of operations may be made public, any of these operations may be named `call`, and any of these operations may accept arguments.
 
+_See [To bang!, or not to bang](https://github.com/amazing-jay/simple_ruby_service/tree/master#to-bang-or-not-to-bang) to learn about `.service_method_name!` vs. `.service_method_name`._
+
+
 #### Short form
 
 _not available for Services_
@@ -198,8 +201,6 @@ result = SomeService.new(foo: 'bar').do_something!
 ```
 
 #### Chained form 
-
-_See [To bang!, or not to bang](https://github.com/amazing-jay/simple_ruby_service/tree/master#to-bang-or-not-to-bang) to learn about `.do_something!` vs. `.do_something`._
 
 ```ruby
 result = SomeService.new(foo: 'bar')
@@ -212,9 +213,9 @@ result = SomeService.new(foo: 'bar')
 ```ruby
 result = begin
   SomeService.new(foo: 'bar').do_something!
-rescue SimpleRubyservice::Invalid => e
+rescue SimpleRubyService::Invalid => e
   # do something with e.target.attributes
-rescue SimpleRubyservice::Failure
+rescue SimpleRubyService::Failure
   # do something with e.target.value
 end
 ```
@@ -241,12 +242,12 @@ result = SomeService.new(foo: 'bar').do_something! do |obj|
 end
 ```
 
-## Creating Simple Ruby services
+## Creating Simple Ruby Services
 
 ### Service Objects
-To implement an Simple Ruby service Object:
+To implement an Simple Ruby Service Object:
 
-  1. extend `SimpleRubyservice::ServiceObject`
+  1. include `SimpleRubyService::ServiceObject`
   2. declare attributes with the `attribute` keyword (class level DSL)
   3. declare validations see [Active Record Validations](https://guides.rubyonrails.org/active_record_validations.html)
   4. implement the special `perform` method (automatically invoked by `call` wrapper method)
@@ -257,12 +258,12 @@ _note: `perform` may optionally accept a block param, but no other args._
 Example::
 ```ruby
 class DoSomething
-  extend SimpleRubyservice::ServiceObject
+  include SimpleRubyService::ServiceObject
   
   attribute :attr1, :attr2             # should include all params required to execute, similar to ActiveRecord
   validates_presence_of :attr1         # validate params
 
-  def perform(&block)
+  def perform
     errors.add(:some critical service, message: 'down') and return unless some_critical_service.up?
     yield if block_given?
 
@@ -272,9 +273,9 @@ end
 ```
 
 ### Services
-To implement an Simple Ruby service:
+To implement an Simple Ruby Service:
 
-  1. extend `SimpleRubyservice::Service`
+  1. include `SimpleRubyService::Service`
   2. declare attributes with the `attribute` keyword (class level DSL)
   3. declare validations see [Active Record Validations](https://guides.rubyonrails.org/active_record_validations.html)
   4. define operations within a `service_methods` block (each method defined will be wrapped)
@@ -287,7 +288,7 @@ Example::
 
 ```ruby
 class SomeService 
-  extend SimpleRubyservice::Service
+  include SimpleRubyService::Service
   
   attribute :attr1, :attr2               # should include all params required to execute, similar to ActiveRecord
   validates_presence_of :attr1           # validate params
@@ -338,11 +339,11 @@ The framework does not include transaction support by default. You are responsib
 ### Control Flow
 Rescue exceptions that represent internal control flow and propogate the rest.
 
-For example, if an internal call to User.create! is expected to always succeed, allow `ActiveRecord::RecordInvalid` to propogate to the caller. If, on the otherhand, an internal call to User.create! is anticipated to conditionally fail on a uniqueness constraint, rescue `ActiveRecord::RecordInvalid` and rely on the framework to raise `SimpleRubyservice::Failure`.
+For example, if an internal call to User.create! is expected to always succeed, allow `ActiveRecord::RecordInvalid` to propogate to the caller. If, on the otherhand, an internal call to User.create! is anticipated to conditionally fail on a uniqueness constraint, rescue `ActiveRecord::RecordInvalid` and rely on the framework to raise `SimpleRubyService::Failure`.
 
 Example::
 ```ruby
-class DoSomethingDangerous < SimpleRubyservice::ObjectBase
+class DoSomethingDangerous < SimpleRubyService::ObjectBase
   attribute :attr1, :attr2             # should include all params required to execute
   validates_presence_of :attr1         # validate params to call
 
@@ -361,12 +362,12 @@ end
 ## Workflows
 SOs often need to call other SOs in order to implement various workflows:
 ```ruby
-class PerformSomeWorkflow < SimpleRubyservice::ObjectBase
+class PerformSomeWorkflow < SimpleRubyService::ObjectBase
   def perform
-    dependency = SimpleRubyservice1.call!
-    result = SimpleRubyservice2.call(dependency)
+    dependency = SimpleRubyService1.call!
+    result = SimpleRubyService2.call(dependency)
     raise unless result.success?                 
-    SimpleRubyservice3(dependency, result.value).call!
+    SimpleRubyService3(dependency, result.value).call!
   end
 end
 ```
@@ -381,8 +382,8 @@ The `attribute` and `attributes` keywords behaves similar to [ActiveRecord::Base
 Use the bang! version of an operation whenever you expect the operation to succeed more often than fail, and you don't need to chain operations together.
 
 Similar in pattern to `ActiveRecord#save!`, the bang version of each operation:
-* raises `SimpleRubyservice::Invalid` if `valid?` is falsey
-* raises `SimpleRubyservice::Failure` if the block provided returns a falsey value
+* raises `SimpleRubyService::Invalid` if `valid?` is falsey
+* raises `SimpleRubyService::Failure` if the block provided returns a falsey value
 * returns `@value`
 
 Whereas, similar in pattern to `ActiveRecord#save`, the regular version of each operation:
@@ -406,5 +407,6 @@ The gem is available as open source under the terms of the [MIT License](https:/
 
 ## DEVELOPMENT ROADMAP
 
-1. Isolate validation errors from execution errors (so that invalid? is not always true when failed? is true)
+1. Create a helper to dynamically generate default SOs for ActiveRecord models (`create`, `update`, and `destroy`) _(when used in a project that includes [ActiveRecord](https://github.com/rails/rails/tree/main/activerecord))_.
+2. Consider isolating validation errors from execution errors (so that invalid? is not always true when failed? is true)
 

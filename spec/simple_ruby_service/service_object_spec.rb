@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
-RSpec.describe SimpleRubyservice::ServiceObject do
+RSpec.describe SimpleRubyService::ServiceObject do
   let(:args) { { foo: :bar } }
   let(:test_class) do
     Class.new do
-      include SimpleRubyservice::ServiceObject
+      include SimpleRubyService::ServiceObject
 
       attribute :foo
       validates_presence_of :foo
@@ -24,7 +24,7 @@ RSpec.describe SimpleRubyservice::ServiceObject do
   end
   let(:error_class) do
     Class.new do
-      include SimpleRubyservice::ServiceObject
+      include SimpleRubyService::ServiceObject
 
       attribute :foo
       validates_presence_of :foo
@@ -232,14 +232,14 @@ RSpec.describe SimpleRubyservice::ServiceObject do
         let(:args) { {} }
 
         it 'should raise an error' do
-          expect { subject }.to raise_error(SimpleRubyservice::Invalid)
+          expect { subject }.to raise_error(SimpleRubyService::Invalid)
         end
 
         context 'with pass block' do
           subject { test_class.new(**args).call! { |obj| obj.value = 'changed'; true } }
 
           it 'should raise an error' do
-            expect { subject }.to raise_error(SimpleRubyservice::Invalid)
+            expect { subject }.to raise_error(SimpleRubyService::Invalid)
           end
         end
 
@@ -247,7 +247,7 @@ RSpec.describe SimpleRubyservice::ServiceObject do
           subject { test_class.new(**args).call! { |obj| obj.value = 'changed'; false } }
 
           it 'should raise an error' do
-            expect { subject }.to raise_error(SimpleRubyservice::Invalid)
+            expect { subject }.to raise_error(SimpleRubyService::Invalid)
           end
         end
       end
@@ -282,14 +282,14 @@ RSpec.describe SimpleRubyservice::ServiceObject do
         let(:args) { {} }
 
         it 'should raise an error' do
-          expect { subject }.to raise_error(SimpleRubyservice::Invalid)
+          expect { subject }.to raise_error(SimpleRubyService::Invalid)
         end
 
         context 'with block' do
           subject { test_class.new(**args).call! { |obj| obj.reset!; 'changed' } }
 
           it 'should change value' do
-            expect { subject }.to raise_error(SimpleRubyservice::Invalid)
+            expect { subject }.to raise_error(SimpleRubyService::Invalid)
           end
         end
       end
@@ -298,7 +298,7 @@ RSpec.describe SimpleRubyservice::ServiceObject do
         let(:args) { { foo: :bar } }
 
         it 'should raise an error' do
-          expect { subject }.to raise_error(SimpleRubyservice::Failure)
+          expect { subject }.to raise_error(SimpleRubyService::Failure)
         end
 
         context 'with block' do

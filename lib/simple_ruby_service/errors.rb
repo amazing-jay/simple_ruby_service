@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module SimpleRubyservice
+module SimpleRubyService
   # Extnding ActiveModel::Errors with additional features:
   # 1. Adds ability to return array of errors
   # 2. Adds ability to decorate errors
