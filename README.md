@@ -9,7 +9,7 @@ The framework provides a simple DSL that:
 
 1. Incorporates ActiveModel validations and error handling
 2. Encourages a succinct, idiomatic coding style 
-3. Ducktypes Service Objects as Procs
+3. Allows Service Objects to ducktype as Procs
 
 ## Requirements
 
@@ -37,11 +37,13 @@ Source code can be downloaded on GitHub
   [github.com/amazing-jay/simple_ruby_service/tree/master](https://github.com/amazing-jay/simple_ruby_service/tree/master)
 
 
-## Quick Start: How to refactor complex business logic with Simple Ruby Service
+## Quick Start
 
 See [Usage](https://github.com/amazing-jay/simple_ruby_service#usage) & [Creating Simple Ruby Services](https://github.com/amazing-jay/simple_ruby_service#creating-simple-ruby-services) for more information.
 
-### ::Before:: Vanilla Rails with a fat controller (a contrived example)
+### How to refactor complex business logic with Simple Ruby Service
+
+#### ::Before:: Vanilla Rails with a fat controller (a contrived example)
 ```ruby
 # in app/controllers/some_controller.rb
 class SomeController < ApplicationController
@@ -51,25 +53,50 @@ class SomeController < ApplicationController
     authorize! resource
     resource.do_something
     value = resource.do_something_related
+    raise unless resource.errors
     render value
   end
 end
 ```
 
-### ::After:: Refactored using an SO
+#### ::After:: Refactored using an SO
 ```ruby
 # in app/controllers/some_controller.rb
 class SomeController < ApplicationController
   def show
-    # Simple Ruby Service Objects ducktype as Procs and do not need to be instantiated
-    render DoSomething.call(params).value
-    
-    # NOTE: This short form returns the value directly and raises an exception if unsuccessful
-    # render DoSomething.call!(params)
+    # NOTE: Just one, readable line of code
+    render DoSomething.call!(params)
   end
 end
+```
+ 
+#### ::Alternate After:: Refactored using a Service
+```ruby
+# in app/controllers/some_controller.rb
+class SomeController < ApplicationController
+  def show
+    # NOTE: Simple Ruby Service methods can be chained together
+    render SomeService.new(params)
+      .do_something
+      .do_something_related
+      .value
+  end
+end
+```
+
+### Taking a peek under the hood
+
+Similar to ActiveRecord::Base#save!, `DoSomething.call!(params)`:
+- creates a Service Object instance
+- initializes `instance.attributes` with `params`
+- raises `SimpleRubyService::Invalid` if `instance.invalid?`
+- sends `instance.call`
+- raises `SimpleRubyService::Failed` if `instance.failed?`
+- returns `instance.value` directly to the caller
 
 
+### Anatomy of a Simple Ruby Service Object
+```ruby
 # in app/service_objects/do_something.rb
 class DoSomething
   include SimpleRubyService::ServiceObject
@@ -85,25 +112,18 @@ class DoSomething
   
   # The return value of `perform` is automatically stored as the SO's `value`
   def perform
-    resource.do_something
-    resource.do_something_related
+    resource.do_something    
+    result = resource.do_something_related  
+    
+    # Adding any kind of error indicates failure
+    add_errors_from_object resource    
+    result
   end
 end
 ```
 
-### ::Alternate After:: Refactored using a Service
+### Anatomy of a Simple Ruby Service
 ```ruby
-# in app/controllers/some_controller.rb
-class SomeController < ApplicationController
-  def show
-    # Simple Ruby Service methods can be chained together
-    render SomeService.new(params)
-      .do_something
-      .do_something_related
-      .value
-  end
-end
-
 # in app/services/do_something.rb
 class SomeService
   include SimpleRubyService::Service
@@ -111,24 +131,37 @@ class SomeService
   attribute :id
   attr_accessor :resource
 
-  # Validations are executed prior to the first service method called
+  # Similar to SOs, validations are executed prior to the first service method called
   validate do
     @resource ||= SomeModel.find(id)
     authorize! @resource
   end
   
+  # Unlike SOs, Services can define an arbitrary number of service methods with arbitrary names
   service_methods do
     def do_something
-      resource.do_something_related
+      resource.do_something      
     end
 
     # Unlike SOs, `value` must be explicitely set for Service methods
     def do_something_related
       self.value ||= resource.tap &:do_something_related
+      add_errors_from_object resource
     end
   end
 end
 ```
+
+## Special note about Simple Ruby Service Objects and Ducktyping
+
+Simple Ruby Service Objects respond to (`#call`) so they can stand in for Procs, i.e.:
+```ruby
+# in app/models/some_model.rb
+class SomeModel < ApplicationRecord
+  validates :some_attribute, if: SomeServiceObject
+  [...]
+```
+_See [To bang!, or not to bang](https://github.com/amazing-jay/simple_ruby_service/tree/master#to-bang-or-not-to-bang) to learn about `.call!` vs. `.call`._
 
 ## Usage
 
@@ -139,8 +172,6 @@ Service Object names should begin with a verb and should not include the words `
 - BAD = `UserCreator`, `CreateUserServiceObject`, etc.
 
 Also, only one operation should be made public, it should always be named `call`, and it should not accept arguments (except for an optional block).
-
-_See [To bang!, or not to bang](https://github.com/amazing-jay/simple_ruby_service/tree/master#to-bang-or-not-to-bang) to learn about `.call!` vs. `.call`._
 
 #### Short form (_recommended_)
 
@@ -199,9 +230,6 @@ Unlike Service Objects, Service class names should begin with a noun (and may in
 - BAD = `CreateUser`, `UserCreatorService`, etc.
 
 Also, any number of operations may be made public, any of these operations may be named `call`, and any of these operations may accept arguments.
-
-_See [To bang!, or not to bang](https://github.com/amazing-jay/simple_ruby_service/tree/master#to-bang-or-not-to-bang) to learn about `.service_method_name!` vs. `.service_method_name`._
-
 
 #### Short form
 
