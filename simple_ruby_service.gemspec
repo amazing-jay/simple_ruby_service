@@ -58,9 +58,9 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'sqlite3', '~> 1.4.2'
   spec.add_development_dependency 'webmock', '~> 3.13'
 
-  if ENV['TEST_RAILS_VERSION'].nil?
+  # if ENV['TEST_RAILS_VERSION'].nil?
     spec.add_development_dependency 'rails', '~> 6.1.3.2'
-  else
-    spec.add_development_dependency 'rails', ENV['TEST_RAILS_VERSION'].to_s
-  end
+  # else
+    # spec.add_development_dependency 'rails', ENV['TEST_RAILS_VERSION'].to_s
+  # end
 end
