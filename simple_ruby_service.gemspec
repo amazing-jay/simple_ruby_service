@@ -49,7 +49,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "listen", "~> 3.5.1"
   spec.add_development_dependency "pry-byebug", "~> 3.9"
 
-  spec.add_development_dependency "rails", "~> 6.1.3.2"
+  # spec.add_development_dependency "rails", "~> 6.1.3.2"
   spec.add_development_dependency "rake", "~> 10.0"
   spec.add_development_dependency "rspec", "~> 3.0"
   spec.add_development_dependency "rspec-rails", "~> 5.0.1"
@@ -61,4 +61,9 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "sqlite3", "~> 1.4.2"
   spec.add_development_dependency "webmock", "~> 3.13"
 
+  if ENV['TEST_RAILS_VERSION'].nil?
+    spec.add_development_dependency 'rails', '~> 6.1.3.2'
+  else
+    spec.add_development_dependency 'rails', ENV['TEST_RAILS_VERSION'].to_s
+  end
 end

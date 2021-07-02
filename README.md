@@ -1,6 +1,6 @@
 # Simple Ruby Service
 
-[![Build Status](https://travis-ci.org/amazing-jay/simple_ruby_service.svg?branch=master)](https://travis-ci.org/amazing-jay/simple_ruby_service)
+[![Build Status](https://travis-ci.com/amazing-jay/simple_ruby_service.svg?branch=master)](https://travis-ci.com/amazing-jay/simple_ruby_service)
 [![Test Coverage](https://codecov.io/gh/amazing-jay/simple_ruby_service/graph/badge.svg)](https://codecov.io/gh/amazing-jay/simple_ruby_service)
 
 Simple Ruby Service is a lightweight framework for Ruby that makes it easy to create Services and Service Objects (SOs).
