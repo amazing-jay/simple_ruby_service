@@ -2,7 +2,7 @@
 
 ## 1.0.3 (01-Jul-21)
 
-* Finished Travis CI and Codecov integration
+* Polished README
 
 ## 1.0.2 (01-Jul-21)
 
