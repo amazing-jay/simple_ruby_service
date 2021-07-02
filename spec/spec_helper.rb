@@ -6,26 +6,6 @@ require_relative "../config/environment"
 
 Rails.logger = Logger.new($stdout)
 
-SimpleCov.start "rails" do
-  add_filter "bin/"
-  add_filter "config/"
-  add_filter "converage/"
-  add_filter "db/"
-  add_filter "lib/generators/templates/"
-  add_filter "spec/"
-  add_filter ".*"
-  add_filter "*.md"
-  add_filter "*.txt"
-  add_filter "*.gemspec"
-  add_filter "Gemfile*"
-end
-
-puts "ENV CI" + ENV["CI"]
-if ENV["CI"] == "true"
-  require "codecov"
-  SimpleCov.formatter = SimpleCov::Formatter::Codecov
-end
-
 require "active_support/testing/time_helpers"
 
 require "webmock/rspec"

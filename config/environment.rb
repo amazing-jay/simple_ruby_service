@@ -14,12 +14,13 @@ if RUBY_ENGINE == 'jruby'
   require 'i18n/backend/simple'
 end
 
-environments = [:default, ENV['RAILS_ENV'].to_sym]
+environments = [ENV['RAILS_ENV'].to_sym]
 environments << :development if environments.last == :test
 
-puts environments.to_s
-
 Bundler.require(*environments)
+
+SimpleCov.start if ENV['RAILS_ENV'].to_s == "test"
+SimpleCov.formatter = SimpleCov::Formatter::Codecov if ENV["CI"] == "true"
 
 require 'simple_ruby_service'
 
