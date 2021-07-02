@@ -14,8 +14,8 @@ if RUBY_ENGINE == 'jruby'
   require 'i18n/backend/simple'
 end
 
-environments = [ENV['RAILS_ENV'].to_sym]
-environments << :development if environments.first == :test
+environments = [:default, ENV['RAILS_ENV'].to_sym]
+environments << :development if environments.last == :test
 
 puts environments.to_s
 
