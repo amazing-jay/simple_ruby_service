@@ -37,11 +37,11 @@ Source code can be downloaded on GitHub
   [github.com/amazing-jay/simple_ruby_service/tree/master](https://github.com/amazing-jay/simple_ruby_service/tree/master)
 
 
-### The following examples illustrate how to refactor complex business logic with Simple Ruby Service
+## Quick Start: How to refactor complex business logic with Simple Ruby Service
 
 See [Usage](https://github.com/amazing-jay/simple_ruby_service#usage) & [Creating Simple Ruby Services](https://github.com/amazing-jay/simple_ruby_service#creating-simple-ruby-services) for more information.
 
-#### ::Before:: Vanilla Rails with a fat controller (a contrived example)
+### ::Before:: Vanilla Rails with a fat controller (a contrived example)
 ```ruby
 # in app/controllers/some_controller.rb
 class SomeController < ApplicationController
@@ -56,13 +56,16 @@ class SomeController < ApplicationController
 end
 ```
 
-#### ::After:: Refactored using an SO
+### ::After:: Refactored using an SO
 ```ruby
 # in app/controllers/some_controller.rb
 class SomeController < ApplicationController
   def show
-    # NOTE: Simple Ruby Service Objects ducktype as Procs and do not need to be instantiated
+    # Simple Ruby Service Objects ducktype as Procs and do not need to be instantiated
     render DoSomething.call(params).value
+    
+    # NOTE: This short form returns the value directly and raises an exception if unsuccessful
+    # render DoSomething.call!(params)
   end
 end
 
@@ -74,13 +77,13 @@ class DoSomething
   attribute :id
   attr_accessor :resource
 
-  # NOTE: Validations are executed prior to the business logic encapsulated in `perform`
+  # Validations are executed prior to the business logic encapsulated in `perform`
   validate do                                 
     @resource ||= SomeModel.find(id)
     authorize! resource
   end
   
-  # NOTE: The return value of `perform` is automatically stored as the SO's `value`
+  # The return value of `perform` is automatically stored as the SO's `value`
   def perform
     resource.do_something
     resource.do_something_related
@@ -88,12 +91,12 @@ class DoSomething
 end
 ```
 
-#### ::Alternate Form:: Refactored using a Service
+### ::Alternate After:: Refactored using a Service
 ```ruby
 # in app/controllers/some_controller.rb
 class SomeController < ApplicationController
   def show
-    # NOTE: Simple Ruby Service methods can be chained together
+    # Simple Ruby Service methods can be chained together
     render SomeService.new(params)
       .do_something
       .do_something_related
@@ -108,7 +111,7 @@ class SomeService
   attribute :id
   attr_accessor :resource
 
-  # NOTE: Validations are executed prior to the first service method called
+  # Validations are executed prior to the first service method called
   validate do
     @resource ||= SomeModel.find(id)
     authorize! @resource
@@ -119,7 +122,7 @@ class SomeService
       resource.do_something_related
     end
 
-    # NOTE: Unlike SOs, `value` must be explicitely set for Service methods
+    # Unlike SOs, `value` must be explicitely set for Service methods
     def do_something_related
       self.value ||= resource.tap &:do_something_related
     end
@@ -323,9 +326,9 @@ end
 
 ### Why should I use Services & SOs?
 
-[Click here](https://www.google.com/search?q=service+object+pattern+rails&rlz=1C5CHFA_enUS893US893&oq=service+object+pattern+rails) to learn more about the Services & SO design pattern.
+[LMGTFY](https://www.google.com/search?q=service+object+pattern+rails&rlz=1C5CHFA_enUS893US893&oq=service+object+pattern+rails) to learn more about the Services & SO design pattern.
 
-**TLDR; fat models and fat controllers are bad! Services and Service Objects help you DRY things up.**
+**TLDR** - Fat models and fat controllers are bad! Services and Service Objects help you DRY things up.
 
 ### How is a Service different from an SO?
 
