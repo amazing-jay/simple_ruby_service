@@ -6,6 +6,7 @@ module SimpleRubyService
     extend ActiveSupport::Concern
     include ActiveModel::AttributeAssignment
     include ActiveModel::Validations
+    include ActiveModel::Validations::Callbacks    
 
     included do
       attr_accessor :value
