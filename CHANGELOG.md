@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.5 (22-Dec-21)
+
+* Added setting to control automatically setting self.value with result of service methods
+
 ## 1.0.4 (02-Jul-21)
 
 * Polished README (again)

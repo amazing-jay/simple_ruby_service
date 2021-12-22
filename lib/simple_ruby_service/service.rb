@@ -6,10 +6,13 @@ module SimpleRubyService
     extend ActiveSupport::Concern
     include ActiveModel::AttributeAssignment
     include ActiveModel::Validations
-    include ActiveModel::Validations::Callbacks    
+    include ActiveModel::Validations::Callbacks
 
     included do
       attr_accessor :value
+
+      class_attribute :set_value_when_service_methods_return
+      self.set_value_when_service_methods_return = true
     end
 
     class_methods do
@@ -33,7 +36,7 @@ module SimpleRubyService
       # Class level DSL that wraps the methods defined in inherited classes.
       def service_methods(&blk)
         Module.new.tap do |m| # Using anonymous modules so that super can be used to extend service methods
-          m.module_eval &blk
+          m.module_eval(&blk)
           include m
 
           m.instance_methods.each do |service_method|
@@ -42,7 +45,8 @@ module SimpleRubyService
             # Returns self (for chainability).
             # Evaluates validity prior to executing the block provided.
             define_method service_method do |*args, **kwargs, &callback|
-              perform(service_method, *args, **kwargs, &callback) if valid?
+              result = perform(service_method, *args, **kwargs, &callback) if valid?
+              self.value = result if set_value_when_service_methods_return
 
               self
             end
@@ -131,5 +135,3 @@ module SimpleRubyService
     end
   end
 end
-
-
